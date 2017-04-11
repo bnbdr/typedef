@@ -8,7 +8,7 @@ from .constants import Endian, Arch, F_SYNC, F_COPY
 from .json_encoder import TypeEncoder
 from .pragma import pack
 
-version = (0, 9, 0, 4)
+version = (0, 9, 0, 5)
 __version__ = '.'.join(map(str, version))
 __description__ = 'A somewhat convenient package for packing and unpacking structs, unions, and arrays using C-like syntax'
 
