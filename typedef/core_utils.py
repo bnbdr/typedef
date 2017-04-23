@@ -3,8 +3,6 @@ from .utils import *
 from .type_creation import TypeContainer, NamedContainer, UnionType, StructType
 
 
-
-
 def get_padded_new_offsets(t, curr_offsets, last_sizes, pragma_pack):
     return (paddify(add_tuples(curr_offsets, last_sizes)[Arch.x86], Arch.x86, pragma_pack, t),
             paddify(add_tuples(curr_offsets, last_sizes)[Arch.x64], Arch.x64, pragma_pack, t))
@@ -53,6 +51,10 @@ def extract(membs, pragma_pack, rvalues=(), is_union=False):
 
                 elif issubclass(t, StructType):  # struct
                     # TODO: should extend value proxy here if it exists in t (also in union)
+                    if is_union:  # init the first member to the beginning of the union
+                        curr_offsets = (0, 0)
+                        last_sizes = (0, 0)
+
                     for st, sn in t:
                         curr_offsets = get_padded_new_offsets(st, curr_offsets, last_sizes, pragma_pack)
                         offsets.append(curr_offsets)
