@@ -632,3 +632,60 @@ class Struct(TypedefTestCase):
         self.assertEqual(s64.p, 0xffffffffffffffff)
         self.assertEqual(s64.c, ord('c'))
         self.assertEqual(bytes(s64), b'\x33\x33!!!!!!\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFFc!!!!!!!')
+
+    def test_struct_type_sizeof(self):
+        S = struct([
+            (WORD, 's'),
+            (PVOID, 'p'),
+            (BYTE, 'c')
+        ])
+        s32 = S(b'\x12\x12!!\x00\x00\x00\x00c!!!', target=Arch.x86)
+        s64 = S(b'\x12\x12!!!!!!\x00\x00\x00\x00\x00\x00\x00\x00c!!!!!!!', target=Arch.x64)
+        self.assertEqual(sizeof(S, Arch.x86), sizeof(s32))
+        self.assertEqual(sizeof(S, Arch.x64), sizeof(s64))
+
+    def test_struct_type_sizeof_error(self):
+        S = struct([
+            (WORD, 's'),
+            (PVOID, 'p'),
+            (BYTE, 'c')
+        ])
+
+        with self.assertRaises(ArchDependentType) as cm:
+            bad = sizeof(S)
+
+    def test_struct_offsetof(self):
+        S = struct([
+            (WORD, 's'),
+            (PVOID, 'p'),
+            (BYTE, 'c')
+        ])
+
+        s32 = S(b'\x12\x12!!\x00\x00\x00\x00c!!!', target=Arch.x86)
+        s64 = S(b'\x12\x12!!!!!!\x00\x00\x00\x00\x00\x00\x00\x00c!!!!!!!', target=Arch.x64)
+
+        self.assertEqual(offsetof('p', s32), 4)
+        self.assertEqual(offsetof('p', s64), 8)
+
+    def test_struct_type_offsetof(self):
+        S = struct([
+            (WORD, 's'),
+            (PVOID, 'p'),
+            (BYTE, 'c')
+        ])
+
+        s32 = S(b'\x12\x12!!\x00\x00\x00\x00c!!!', target=Arch.x86)
+        s64 = S(b'\x12\x12!!!!!!\x00\x00\x00\x00\x00\x00\x00\x00c!!!!!!!', target=Arch.x64)
+
+        self.assertEqual(offsetof('p', S, target_arch=Arch.x86), 4)
+        self.assertEqual(offsetof('p', S, target_arch=Arch.x64), 8)
+
+    def test_struct_type_offsetof_error(self):
+        S = struct([
+            (WORD, 's'),
+            (PVOID, 'p'),
+            (BYTE, 'c')
+        ])
+
+        with self.assertRaises(ArchDependentType) as cm:
+            bad = offsetof('p', S)

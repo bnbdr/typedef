@@ -20,7 +20,7 @@ def sizeof(t, target_arch=Arch.Unknown):
     except (AttributeError, TypeError):
         arch = target_arch
 
-    if target_arch is Arch.Unknown:
+    if arch is Arch.Unknown:
         raise ArchDependentType('type size depends on target arch')
 
     return sizes[arch]
@@ -48,7 +48,7 @@ def offsetof(mem_name, t, target_arch=Arch.Unknown):
     except (AttributeError, TypeError):
         arch = target_arch
 
-    if target_arch is Arch.Unknown:
+    if arch is Arch.Unknown:
         raise ArchDependentType('type offset depends on target arch')
 
     return offsets[arch]
