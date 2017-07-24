@@ -44,3 +44,9 @@ class BadBufferInput(TypeError):
     """
     when the string input is in unicode in py2 or not bytes in py3
     """
+
+
+class MissingMember(AttributeError):
+    """
+    when member is being accessd but cannot be found
+    """
