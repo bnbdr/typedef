@@ -1,6 +1,6 @@
 from typedef.type_definition import define_simple_type, define_array, define_struct, define_union
 from typedef.constants import Endian, Arch
-from typedef.errors import ArchDependentType, MissingMember
+from typedef.errors import ArchDependentType, MissingField
 
 
 def sizeof(t, target_arch=Arch.Unknown):
@@ -38,7 +38,7 @@ def offsetof(mem_name, t, target_arch=Arch.Unknown):
     try:
         offsets = t.__offsets__[t.__names__.index(mem_name)]
     except:
-        raise MissingMember('`{}` cannot be found in type {}'.format(mem_name, repr(t)))
+        raise MissingField('`{}` cannot be found in type {}'.format(mem_name, repr(t)))
 
     if offsets[0] == offsets[1]:
         return offsets[0]
