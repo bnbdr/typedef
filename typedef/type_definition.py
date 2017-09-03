@@ -7,11 +7,11 @@ except ImportError:
     izip = zip
 
 from string import ascii_letters
-from .type_creation import *
-from .core_utils import *
-from .pragma import pack
-from .errors import UnsupportedInitializationMethod, TypeMismatch, BadAccessorName
-from .utils import str_buffer_types
+from typedef.type_creation import *
+from typedef.core_utils import *
+from typedef.pragma import pack
+from typedef.errors import UnsupportedInitializationMethod, TypeMismatch, BadAccessorName
+from typedef.utils import str_buffer_types
 
 permissable_name_prefix = set(ascii_letters + '_')
 defined_types = {}

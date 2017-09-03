@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
-from .constants import Arch
-from .errors import PragmaValueMissing, UnsupportedPragmaPack
+from typedef.constants import Arch
+from typedef.errors import PragmaValueMissing, UnsupportedPragmaPack
 
 pack_stack = []
 

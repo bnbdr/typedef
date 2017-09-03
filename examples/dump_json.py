@@ -1,6 +1,8 @@
 from __future__ import print_function
 import json
 from typedef import *
+from typedef.tools import TypeEncoder
+
 
 S = struct([
     (DWORD, 'd'),

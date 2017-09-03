@@ -1,6 +1,6 @@
-from .type_definition import define_simple_type, define_array, define_struct, define_union
-from .constants import Endian, Arch
-from .errors import ArchDependentType, MissingMember
+from typedef.type_definition import define_simple_type, define_array, define_struct, define_union
+from typedef.constants import Endian, Arch
+from typedef.errors import ArchDependentType, MissingMember
 
 
 def sizeof(t, target_arch=Arch.Unknown):

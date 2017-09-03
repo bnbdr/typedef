@@ -10,9 +10,9 @@ try:
 except ImportError:
     izip = zip
 
-from .constants import *
-from .errors import TypeMismatch, ArchDependentType, BufferTooShort, UnsupportedInitializationMethod, BadBufferInput
-from .utils import str_buffer_types
+from typedef.constants import *
+from typedef.errors import TypeMismatch, ArchDependentType, BufferTooShort, UnsupportedInitializationMethod, BadBufferInput
+from typedef.utils import str_buffer_types
 
 
 class TypeDefinition(object):

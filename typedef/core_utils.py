@@ -1,6 +1,6 @@
-from .constants import Arch
-from .utils import *
-from .type_creation import TypeContainer, NamedContainer, UnionType, StructType
+from typedef.constants import Arch
+from typedef.utils import *
+from typedef.type_creation import TypeContainer, NamedContainer, UnionType, StructType
 
 
 def get_padded_new_offsets(t, curr_offsets, last_sizes, pragma_pack):
