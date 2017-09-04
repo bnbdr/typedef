@@ -120,33 +120,39 @@ class ComplexMeta(type):
             raise AttributeError('`{}` type has no attribute `{}`'.format(self.__name__, item))
         return self.__types__[self.__names__.index(item)]
 
-    def __str__(cls):
+    def __repr__(cls):
         o = cls.__name__
         for internal_mem in cls.__slots__:
             o += '\n\t{}: {}'.format(internal_mem, str(cls.__dict__[internal_mem]))
 
         return o
 
-    def __repr__(cls):
+    def __str__(cls):
         return "<type `{}`>".format(cls.__name__)
 
     def __new__(mcs, name, parents, member_list, accessor=''):
         if type(member_list) not in [list, tuple]:
             raise UnsupportedInitializationMethod(
                 'type `{}` is not supported; only list or tuple'.format(type(member_list)))
+        if not member_list:
+            raise UnsupportedInitializationMethod('requires field definitions')
+
         rvals_new = []
         new_membs = []
         for tn in member_list:
             if type(tn) in [tuple]:
                 new_membs.append(tn)
-            elif issubclass(tn, NamedContainer):  # RVALUE
-                n = tn.__accessor__  # :nameless or not
-                t = tn
-                rvals_new.append(n)
-                new_membs.append((t, n))
-
             else:
-                raise UnsupportedInitializationMethod('unsupported input for  type-member tuple')
+                try:
+                    if issubclass(tn, NamedContainer):  # RVALUE
+                        n = tn.__accessor__  # :nameless or not
+                        t = tn
+                        rvals_new.append(n)
+                        new_membs.append((t, n))
+                    else:
+                        raise UnsupportedInitializationMethod('input must be simple or complex type-definition')
+                except TypeError:
+                    raise UnsupportedInitializationMethod('unsupported input for type-member tuple')
 
         member_list = new_membs
         rvals = rvals_new

@@ -689,3 +689,16 @@ class Struct(TypedefTestCase):
 
         with self.assertRaises(ArchDependentType) as cm:
             bad = offsetof('p', S)
+
+    def test_struct_bad_init_def(self):
+        with self.assertRaises(UnsupportedInitializationMethod) as cm:
+            S = struct([])
+        self.assertEqual(cm.exception.args[0], 'requires field definitions')
+
+        with self.assertRaises(UnsupportedInitializationMethod) as cm:
+            S = struct([list])
+        self.assertEqual(cm.exception.args[0], 'input must be simple or complex type-definition')
+
+        with self.assertRaises(UnsupportedInitializationMethod) as cm:
+            S = struct([1])
+        self.assertEqual(cm.exception.args[0], 'unsupported input for type-member tuple')
