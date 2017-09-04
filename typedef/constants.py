@@ -1,5 +1,7 @@
 import platform
 
+MAX_REPR_BYTE_PRINT = 200
+
 
 class Endian:
     Reserved = 0  # TODO: network = big
