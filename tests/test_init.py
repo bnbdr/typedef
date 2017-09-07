@@ -56,3 +56,17 @@ class InitPassthrough(TypedefTestCase):
             data = open(self.test_file_path, 'rb').read()
         self.assertEqual(data, bytes(s))
         # s.__buffer__.close()
+
+
+class InitSimpleType(TypedefTestCase):
+    def test_init_simple_from_file(self):
+        with warnings.catch_warnings(record=True):  # to ignore warning on unclosed file
+            open(self.test_file_path, 'wb').write(b'\x00\x00\x00\x00\xAA\xBB\xCC\xDD')
+        f = open(self.test_file_path, 'rb')
+
+        self.assertEqual(DWORD(f), 0)
+        self.assertEqual(WORD(f), WORD(b'\xAA\xBB'))
+        self.assertEqual(WORD(f), WORD(b'\xCC\xDD'))
+
+        with self.assertRaises(pystruct.error) as cm:
+            BYTE(f)

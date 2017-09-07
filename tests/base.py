@@ -3,6 +3,7 @@ import warnings
 from sys import version_info
 from os import path, remove
 import gc
+import struct as pystruct
 from typedef import *
 from typedef.errors import *  # for when tests import this module
 

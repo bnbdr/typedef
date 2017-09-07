@@ -1,5 +1,6 @@
 import struct as pystruct
 from collections import Counter
+from numbers import Number
 
 try:
     from itertools import izip
@@ -47,9 +48,9 @@ class ArrayableMeta(type):
 class SimpleMeta(ArrayableMeta):
     Masks = dict([(s, 2 ** (s * 8) - 1) for s in [1, 2, 4, 8, 16]])
 
-    def __new__(mcs, name, parents, sizes, signed, end, default=0):
+    def __new__(mcs, name, parents, sizes, signed, end, default=0, frmt=None):
         used_members = {
-            '__frmt__': SimpleMeta._get_frmts(sizes, signed, end),
+            '__frmt__': frmt or SimpleMeta._get_frmts(sizes, signed, end),
             '__align__': sizes,
             '__end__': end,
             '__signed__': signed,
@@ -93,13 +94,19 @@ class SimpleMeta(ArrayableMeta):
 
     def __call__(self, b=None, target=None, *args, **kwargs):
 
-        if b is None:
-            return self.__default__
-
         if target is None and len(set(self.__size__)) == 2:  # size differ on archs
             raise ArchDependentType('requires arch on simpletype __call__')
         target = target or 0
         frmt = self.__frmt__[target]
+
+        if b is None:
+            return self.__default__
+
+        if isinstance(b, Number):
+            if not self.__signed__:
+                s = self.__size__[target]
+                b = b & SimpleMeta.Masks[s]
+            return pystruct.pack(frmt, b)
 
         if type(b) not in str_buffer_types and type(b) is type(''):
             raise BadBufferInput('input string should be one of the following: {}'.format(str_buffer_types))
@@ -107,10 +114,7 @@ class SimpleMeta(ArrayableMeta):
         if type(b) in str_buffer_types:
             return pystruct.unpack(frmt, b)[0]
 
-        if not self.__signed__:
-            s = self.__size__[target]
-            b = b & SimpleMeta.Masks[s]
-        return pystruct.pack(frmt, b)
+        return pystruct.unpack(frmt, b.read(self.__size__[target]))[0]
 
 
 class ComplexMeta(type):
