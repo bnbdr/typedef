@@ -8,7 +8,7 @@ from typedef.api import *
 from typedef.constants import Endian, Arch, F_SYNC, F_COPY
 from typedef.primitives import *
 
-version = (0, 9, 0, 5)
+version = (0, 9, 0, 6)
 __version__ = '.'.join(map(str, version))
 __description__ = 'A somewhat convenient package for packing and unpacking structs, unions, and arrays using C-like syntax'
 __all__ = ['pragma', 'Endian', 'Arch', 'F_SYNC', 'F_COPY', 'errors', 'sizeof', 'offsetof', 'struct',

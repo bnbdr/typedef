@@ -9,7 +9,7 @@ setup(
     author='bdr00',
     author_email='bad.32@outlook.com',
     url='https://github.com/bdr00/typedef',
-    download_url='https://github.com/bdr00/typedef/archive/v0.9.0.5.tar.gz',
+    download_url='https://github.com/bdr00/typedef/archive/v{}.tar.gz'.format(typedef.__version__),
     keywords=['typedef', 'struct', 'union', ' pack', 'unpack', 'binary'],
     classifiers=[
         'Programming Language :: Python :: 2',
