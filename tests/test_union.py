@@ -12,6 +12,27 @@ class Union(TypedefTestCase):
             u = U({})
         self.assertEqual(cm.exception.args[0], 'union cannot be initialized using a dict/list/tuple; only buffer')
 
+    def test_union_with_nameless_struct_reverse_order(self):
+        pragma.pack.push(1)
+        clr = union([
+            (DWORD, 'hex'),
+            struct([
+                (BYTE, 'r'),
+                (BYTE, 'g'),
+                (BYTE, 'b'),
+                (BYTE, 'a')
+            ])
+        ])
+
+        self.assertEqual(clr.__size__, DWORD.__size__)
+        self.assertEqual(clr.__offsets__, [(0, 0), (0, 0), (1, 1), (2, 2), (3, 3)])
+        u = clr(DWORD(0x00AABBCC))
+        self.assertEqual(u.hex, 0x00AABBCC)
+        self.assertEqual(u.r, 0xCC)
+        self.assertEqual(u.g, 0xBB)
+        self.assertEqual(u.b, 0xAA)
+        self.assertEqual(u.a, 0)
+
     def test_union_with_nameless_struct(self):
         U = union([
             struct([
@@ -116,3 +137,48 @@ class Union(TypedefTestCase):
         self.assertEqual(u32.s, 0x2211)
         self.assertEqual(u32.i, 0x44332211)
         self.assertEqual(u32.p, 0x44332211)
+
+    def test_union_sizeof(self):
+        U = union([
+            (WORD, 's'),
+            (PVOID, 'p'),
+            (BYTE, 'c')
+        ])
+
+        u32 = U(target=Arch.x86)
+        u64 = U(target=Arch.x64)
+
+        self.assertEqual(sizeof(u32), sizeof(PVOID, Arch.x86))
+        self.assertEqual(sizeof(u64), sizeof(PVOID, Arch.x64))
+
+    def test_union_type_sizeof(self):
+        U = union([
+            (WORD, 's'),
+            (PVOID, 'p'),
+            (BYTE, 'c')
+        ])
+        u32 = U(target=Arch.x86)
+        u64 = U(target=Arch.x64)
+        self.assertEqual(sizeof(U, Arch.x86), sizeof(u32))
+        self.assertEqual(sizeof(U, Arch.x64), sizeof(u64))
+
+    def test_union_type_sizeof_error(self):
+        U = union([
+            (WORD, 's'),
+            (PVOID, 'p'),
+            (BYTE, 'c')
+        ])
+
+        with self.assertRaises(ArchDependentType) as cm:
+            bad = sizeof(U)
+
+    def test_union_type_offsetof(self):
+        U = union([
+            (WORD, 's'),
+            (PVOID, 'p'),
+            (BYTE, 'c')
+        ])
+
+        self.assertEqual(offsetof('s', U), 0)
+        self.assertEqual(offsetof('p', U), 0)
+        self.assertEqual(offsetof('c', U), 0)

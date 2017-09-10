@@ -66,3 +66,14 @@ class Union(TypedefTestCase):
         self.assertEqual(u.signedLittle, pystruct.unpack('<i', b)[0])
         self.assertEqual(u.unsignedBig, pystruct.unpack('>I', b)[0])
         self.assertEqual(u.signedBig, pystruct.unpack('>i', b)[0])
+
+
+class Size(TypedefTestCase):
+    def test_sizeof(self):
+        self.assertEqual(sizeof(BYTE), 1)
+        self.assertEqual(sizeof(WORD), 2)
+        self.assertEqual(sizeof(DWORD), 4)
+        self.assertEqual(sizeof(QWORD), 8)
+
+        self.assertEqual(sizeof(PVOID, Arch.x86), 4)
+        self.assertEqual(sizeof(PVOID, Arch.x64), 8)

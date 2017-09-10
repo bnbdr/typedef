@@ -179,3 +179,14 @@ class Array(TypedefTestCase):
 
         # gc.collect()
         # print gc.get_referrers(b)
+
+    def test_sizeof(self):
+        S = struct([
+            (DWORD, 'd'),
+            (WORD, 'w')
+        ])
+        A = S[2]
+        self.assertEqual(sizeof(A), 16)
+        a = S[2](b'\x00\x00\x00\x00\xBB\xBB!!aaaabb!!')
+        self.assertEqual(sizeof(a), sizeof(S) * 2)
+        self.assertEqual(sizeof(a[0]), sizeof(S))

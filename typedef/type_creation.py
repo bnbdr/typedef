@@ -10,9 +10,11 @@ try:
 except ImportError:
     izip = zip
 
-from .constants import *
-from .errors import TypeMismatch, ArchDependentType, BufferTooShort, UnsupportedInitializationMethod, BadBufferInput
-from .utils import str_buffer_types
+from typedef.constants import *
+from typedef.errors import TypeMismatch, ArchDependentType, BufferTooShort, UnsupportedInitializationMethod, \
+    BadBufferInput
+from typedef.utils import str_buffer_types
+from typedef.constants import MAX_REPR_BYTE_PRINT
 
 
 class TypeDefinition(object):
@@ -71,6 +73,9 @@ def get_buf(self):
 class TypeContainer(TypeDefinition):
     __slots__ = ()
 
+    def __dir__(self):
+        return list(set(self.__names__))
+
     def __del__(self):
         if hasattr(self, '__pass__') and self.__pass__ == F_SYNC:
             self.__buffer__.close()
@@ -82,7 +87,13 @@ class TypeContainer(TypeDefinition):
         return get_buf(self)
 
     def __repr__(self):
-        return " ".join('%02x' % (ord(c) if isinstance(c, *str_buffer_types) else c) for c in get_buf(self))
+        b = get_buf(self)
+        suffix = ''
+        if len(b) > MAX_REPR_BYTE_PRINT:
+            count_remaining = len(b) - MAX_REPR_BYTE_PRINT
+            b = b[:MAX_REPR_BYTE_PRINT]
+            suffix = ' ...(%d truncated)' % count_remaining
+        return " ".join('%02x' % (ord(c) if isinstance(c, *str_buffer_types) else c) for c in b) + suffix
 
     def __init__(self, b, target, prnt, idx, passthrough):
         if self.__machdep__ and target == Arch.Unknown:

@@ -1,6 +1,8 @@
 from __future__ import print_function
 import json
 from typedef import *
+from typedef.tools import TypeEncoder
+
 
 # used definition from 010editor template: https://www.sweetscape.com/010editor/repository/files/EXE.bt
 with pragma.pack(1):

@@ -1,5 +1,6 @@
 import struct as pystruct
 from collections import Counter
+from numbers import Number
 
 try:
     from itertools import izip
@@ -7,11 +8,11 @@ except ImportError:
     izip = zip
 
 from string import ascii_letters
-from .type_creation import *
-from .core_utils import *
-from .pragma import pack
-from .errors import UnsupportedInitializationMethod, TypeMismatch, BadAccessorName
-from .utils import str_buffer_types
+from typedef.type_creation import *
+from typedef.core_utils import *
+from typedef.pragma import pack
+from typedef.errors import UnsupportedInitializationMethod, TypeMismatch, BadAccessorName
+from typedef.utils import str_buffer_types
 
 permissable_name_prefix = set(ascii_letters + '_')
 defined_types = {}
@@ -47,9 +48,9 @@ class ArrayableMeta(type):
 class SimpleMeta(ArrayableMeta):
     Masks = dict([(s, 2 ** (s * 8) - 1) for s in [1, 2, 4, 8, 16]])
 
-    def __new__(mcs, name, parents, sizes, signed, end, default=0):
+    def __new__(mcs, name, parents, sizes, signed, end, default=0, frmt=None):
         used_members = {
-            '__frmt__': SimpleMeta._get_frmts(sizes, signed, end),
+            '__frmt__': frmt or SimpleMeta._get_frmts(sizes, signed, end),
             '__align__': sizes,
             '__end__': end,
             '__signed__': signed,
@@ -93,13 +94,19 @@ class SimpleMeta(ArrayableMeta):
 
     def __call__(self, b=None, target=None, *args, **kwargs):
 
-        if b is None:
-            return self.__default__
-
         if target is None and len(set(self.__size__)) == 2:  # size differ on archs
             raise ArchDependentType('requires arch on simpletype __call__')
         target = target or 0
         frmt = self.__frmt__[target]
+
+        if b is None:
+            return self.__default__
+
+        if isinstance(b, Number):
+            if not self.__signed__:
+                s = self.__size__[target]
+                b = b & SimpleMeta.Masks[s]
+            return pystruct.pack(frmt, b)
 
         if type(b) not in str_buffer_types and type(b) is type(''):
             raise BadBufferInput('input string should be one of the following: {}'.format(str_buffer_types))
@@ -107,10 +114,7 @@ class SimpleMeta(ArrayableMeta):
         if type(b) in str_buffer_types:
             return pystruct.unpack(frmt, b)[0]
 
-        if not self.__signed__:
-            s = self.__size__[target]
-            b = b & SimpleMeta.Masks[s]
-        return pystruct.pack(frmt, b)
+        return pystruct.unpack(frmt, b.read(self.__size__[target]))[0]
 
 
 class ComplexMeta(type):
@@ -120,33 +124,39 @@ class ComplexMeta(type):
             raise AttributeError('`{}` type has no attribute `{}`'.format(self.__name__, item))
         return self.__types__[self.__names__.index(item)]
 
-    def __str__(cls):
+    def __repr__(cls):
         o = cls.__name__
         for internal_mem in cls.__slots__:
             o += '\n\t{}: {}'.format(internal_mem, str(cls.__dict__[internal_mem]))
 
         return o
 
-    def __repr__(cls):
+    def __str__(cls):
         return "<type `{}`>".format(cls.__name__)
 
     def __new__(mcs, name, parents, member_list, accessor=''):
         if type(member_list) not in [list, tuple]:
             raise UnsupportedInitializationMethod(
                 'type `{}` is not supported; only list or tuple'.format(type(member_list)))
+        if not member_list:
+            raise UnsupportedInitializationMethod('requires field definitions')
+
         rvals_new = []
         new_membs = []
         for tn in member_list:
             if type(tn) in [tuple]:
                 new_membs.append(tn)
-            elif issubclass(tn, NamedContainer):  # RVALUE
-                n = tn.__accessor__  # :nameless or not
-                t = tn
-                rvals_new.append(n)
-                new_membs.append((t, n))
-
             else:
-                raise UnsupportedInitializationMethod('unsupported input for  type-member tuple')
+                try:
+                    if issubclass(tn, NamedContainer):  # RVALUE
+                        n = tn.__accessor__  # :nameless or not
+                        t = tn
+                        rvals_new.append(n)
+                        new_membs.append((t, n))
+                    else:
+                        raise UnsupportedInitializationMethod('input must be simple or complex type-definition')
+                except TypeError:
+                    raise UnsupportedInitializationMethod('unsupported input for type-member tuple')
 
         member_list = new_membs
         rvals = rvals_new
