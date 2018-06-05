@@ -43,7 +43,6 @@ def onchange_logic(obj, offset, new_buffer, child_i, child_size=None):
         return bio.read(o_s)
 
     target_o = obj.__offsets__[child_i][obj.__arch__] + offset if child_i is not None else offset
-
     target_o_end = target_o + len(new_buffer)
     bio.seek(target_o)
     bio.write(new_buffer)
@@ -54,9 +53,9 @@ def onchange_logic(obj, offset, new_buffer, child_i, child_size=None):
         t = obj.__types__[i]
         s = t.__size__[obj.__arch__]
         bio.seek(o)
-
-        if target_o <= o < target_o_end or \
-                                target_o < (o + s) <= target_o_end:
+        
+        if o <= target_o <o+s:
+            assert s >= len(new_buffer), 'new buffer overflows its containing type'
             obj.__values__[i] = t(bio.read(s) if issubclass(t, SimpleType) else bio, target=obj.__arch__,
                                   prnt=weakref.ref(obj),
                                   idx=i)
@@ -276,10 +275,10 @@ class NamedContainer(TypeContainer):
 
         idx = self.__names__.index(key)
         tp = self.__types__[idx]
-
+        
         value = _getvalue(self, tp, value)
         self.__onchange__(0, value, idx)  # this would return buffer
-
+        
     def __getattr__(self, item):
         if item not in self.__names__:
             raise AttributeError('`{}` not defined in `{}`'.format(item, self.__class__))

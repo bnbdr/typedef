@@ -2,6 +2,78 @@ from base import *
 
 
 class Struct(TypedefTestCase):
+
+    def test_value_updated_sub_struct(self):
+        with pragma.pack(8):
+            INNER = struct([
+                (DWORD, 'd1'),
+                (DWORD, 'd2'),
+            ])
+        with pragma.pack(1):
+            S = struct([
+                (INNER, 'inner'),
+            ])
+
+        body = S()
+        self.assertEqual(body.inner.d2, 0) 
+        body.inner.d2 = sizeof(body)
+        self.assertEqual(body.inner.d2, sizeof(body)) 
+
+
+    def test_overriding_member_names(self):
+        with self.assertRaises(BadAccessorName) as cm:
+            BB = struct(
+            [
+                (DWORD, 'a'),
+                struct(
+                    [
+                        (DWORD, 'aa'),
+                        (DWORD, 'aa'),
+                    ])
+            ]
+        )
+
+        self.assertEqual(cm.exception.args[0], "found duplicate names overriding each other: ['aa']")
+        
+
+    def test_nameless_child_struct_in_offset(self):
+        S = struct(
+            [
+                (DWORD, 'a'),
+                struct(
+                    [
+                        (DWORD, 'aa'),
+                    ])
+            ]
+        )
+        self.assertEqual(S.__size__, (8,8))
+        BB = struct(
+            [
+                (DWORD, 'a'),
+                struct(
+                    [
+                        (DWORD, 'aa'),
+                        (DWORD, 'bb'),
+                    ])
+            ]
+        )
+        self.assertEqual(BB.__size__, (12,12))
+        
+        with pragma.pack(8):
+            BB = struct(
+                [
+                    (DWORD, 'a'),
+                    struct(
+                        [
+                            (DWORD, 'aa'),
+                            (DWORD, 'bb'),
+                        ])
+                ]
+            )
+
+        self.assertEqual(BB.__size__, (24,24))
+        self.assertEqual(BB.__offsets__, [(0,0),(8,8),(16,16)])
+        
     def test_complex_with_pack(self):
         with pragma.pack(4):
             S = struct([

@@ -2,6 +2,26 @@ from base import *
 
 
 class Union(TypedefTestCase):
+    def test_value_updated_sub_struct(self):
+        with pragma.pack(8):
+            INNER = struct([
+                (DWORD, 'd1'),
+                (DWORD, 'd2'),
+            ])
+        with pragma.pack(1):
+            S = union([
+                (INNER, 'inner'),
+                (QWORD[2], 'qsWithPadding')
+            ])
+
+        body = S()
+        self.assertEqual(body.inner.d2, 0) 
+        self.assertEqual(body.qsWithPadding[0], 0) 
+        
+        body.inner.d2 = sizeof(body)
+        self.assertEqual(body.qsWithPadding[0], 0) 
+        self.assertEqual(body.qsWithPadding[1], sizeof(body)) 
+
     def test_union_cannot_be_init_dict(self):
         U = union([
             (WORD[2], 'w'),
