@@ -55,12 +55,15 @@ def extract(membs, pragma_pack, rvalues=(), is_union=False):
                         curr_offsets = (0, 0)
                         last_sizes = (0, 0)
 
+                    inner_st_last_size = (0, 0) 
+                    
                     for st, sn in t:
-                        curr_offsets = get_padded_new_offsets(st, curr_offsets, last_sizes, pragma_pack)
+                        curr_offsets = get_padded_new_offsets(st, curr_offsets, inner_st_last_size, pragma_pack)
+                        inner_st_last_size = handle_memb(st, sn)
                         offsets.append(curr_offsets)
-                        last_sizes = handle_memb(st, sn)
+                    
+                    last_sizes = inner_st_last_size
                     continue
-
     sizes = add_tuples(curr_offsets, last_sizes)
 
     return sizes, offsets, children_tps, children_nms, value_proxy
