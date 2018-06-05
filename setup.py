@@ -9,7 +9,7 @@ setup(
     description=typedef.__description__,
     author=author,
     author_email='bad.32@outlook.com',
-    url='https://github.com/{}/typedef',
+    url='https://github.com/{}/typedef'.format(author),
     download_url='https://github.com/{}/typedef/archive/v{}.tar.gz'.format(author, typedef.__version__),
     keywords=['typedef', 'struct', 'union', ' pack', 'unpack', 'binary'],
     classifiers=[
