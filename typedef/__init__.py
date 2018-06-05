@@ -1,5 +1,5 @@
 """
-A somewhat convenient package for packing and unpacking structs, unions, and arrays using C-like syntax
+Conveniently handle structs, unions, and arrays
 """
 import typedef.api
 import typedef.errors
