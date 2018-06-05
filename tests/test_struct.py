@@ -3,6 +3,23 @@ from base import *
 
 class Struct(TypedefTestCase):
 
+    def test_value_updated_sub_struct(self):
+        with pragma.pack(8):
+            INNER = struct([
+                (DWORD, 'd1'),
+                (DWORD, 'd2'),
+            ])
+        with pragma.pack(1):
+            S = struct([
+                (INNER, 'inner'),
+            ])
+
+        body = S()
+        self.assertEqual(body.inner.d2, 0) 
+        body.inner.d2 = sizeof(body)
+        self.assertEqual(body.inner.d2, sizeof(body)) 
+
+
     def test_overriding_member_names(self):
         with self.assertRaises(BadAccessorName) as cm:
             BB = struct(
