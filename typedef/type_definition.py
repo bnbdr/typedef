@@ -188,9 +188,11 @@ class ComplexMeta(type):
         }
         if accessor:
             ComplexMeta._check_names([accessor], used_members.keys())  # just to make sure
-
-        if NamedContainer in parents:
+        
+        should_check_names = [1 for p in parents if issubclass(p, NamedContainer) ]
+        if should_check_names:
             ComplexMeta._check_names(children_nms, disallowed_names=used_members.keys())
+
         ComplexMeta._check_types(children_tps)
         cls_members = {
             '__slots__': tuple(
@@ -214,7 +216,7 @@ class ComplexMeta(type):
     def _check_names(names, disallowed_names=()):
         bad_names = [k for k, v in Counter(names).items() if v > 1]
         if bad_names:
-            raise BadAccessorName('found duplicate names overriding each other: {} '.format(bad_names))
+            raise BadAccessorName('found duplicate names overriding each other: {}'.format(bad_names))
 
         bad_names = [n for n in names if n.lower() in disallowed_names]
         if bad_names:
